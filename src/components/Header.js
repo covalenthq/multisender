@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { inject, observer } from "mobx-react";
+import GithubCorner from 'react-github-corner';
 
 @inject("UiStore")
 @observer
@@ -35,6 +36,7 @@ export class Header extends React.Component {
       <div className="multisend-container">
         Supports Mainnet, Ropsten, Rinkeby, Kovan, Goerli
       </div>
+      <GithubCorner href="https://github.com/olegabr/multisender" target="_blank" rel="nofollow" />
     </header>
     )
   }

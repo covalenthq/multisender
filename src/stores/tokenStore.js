@@ -256,7 +256,8 @@ class TokenStore {
           if(Object.keys(account).length === 0){
             rej({message: `There was an error parsing ${JSON.stringify(account)} at line ${index}`})
           }
-          const address = Object.keys(account)[0].replace(/\s/g, "");;
+          let address = Object.keys(account)[0].replace(/\s/g, "").replace("0X", "0x")
+          address = Web3Utils.toChecksumAddress(address)
           if(!Web3Utils.isAddress(address)){
             this.invalid_addresses.push(address);
           } else {

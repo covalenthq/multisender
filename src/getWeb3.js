@@ -9,8 +9,12 @@ let getWeb3 = () => {
       // Checking if Web3 has been injected by the browser (Mist/MetaMask)
       if (typeof web3 !== 'undefined') {
         // Use Mist/MetaMask's provider.
-        web3 = new window.Web3(web3.currentProvider)
-        web3.version.getNetwork((err, netId) => {
+        //web3 = new window.Web3(web3.currentProvider)
+        let web3Provider = window.web3.currentProvider;
+        window.ethereum.enable()
+        //web3.version.getNetwork((err, netId) => {
+          window.ethereum.request({ method: 'eth_chainId' }).then((netId) => 
+          {
           let netIdName, trustApiName, explorerUrl;
           console.log('netId', netId);
           switch (netId) {
@@ -55,10 +59,28 @@ let getWeb3 = () => {
               console.log('This is an unknown network.', netId)
           }
           document.title = `${netIdName} - MultiSender dApp`
-          var defaultAccount = web3.eth.defaultAccount || null;
-          if(defaultAccount === null){
-            reject({message: 'Please unlock your metamask and refresh the page'})
-          }
+          var defaultAccount = null;
+          window.ethereum
+          .request({ method: 'eth_accounts' })
+          .then((accounts) =>  {
+            if (accounts.length === 0) {
+              // MetaMask is locked or the user has not connected any accounts
+              console.log('Please connect to MetaMask.');
+            } else if (accounts[0] !== defaultAccount) {
+              defaultAccount = accounts[0];
+              // Do any other work!
+            }
+            if(defaultAccount === null){
+              reject({message: 'Please unlock your metamask and refresh the page'})
+            }
+  
+          })
+          .catch((err) => {
+            // Some unexpected error.
+            // For backwards compatibility reasons, if no accounts are available,
+            // eth_accounts will return an empty array.
+            console.error(err);
+          });          
           results = {
             web3Instance: web3,
             netIdName,

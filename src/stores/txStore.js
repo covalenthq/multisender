@@ -153,8 +153,10 @@ class TxStore {
     setTimeout(() => {
       const web3 = this.web3Store.web3;
       web3.eth.getTransactionReceipt(hash, (error, res) => {
+        console.log(res);
+        console.log(error);
         if(res && res.blockNumber){
-          if(res.status === '0x1'){
+          if(res.status === '0x1' || res.status === true){
             const index = this.txHashToIndex[hash]
             this.txs[index].status = `mined`
           } else {

@@ -73,7 +73,16 @@ let getWeb3 = () => {
             if(defaultAccount === null){
               reject({message: 'Please unlock your metamask and refresh the page'})
             }
-  
+            results = {
+              web3Instance: web3,
+              netIdName,
+              netId,
+              injectedWeb3: true,
+              defaultAccount,
+              trustApiName,
+              explorerUrl
+            }
+            resolve(results)
           })
           .catch((err) => {
             // Some unexpected error.
@@ -81,16 +90,7 @@ let getWeb3 = () => {
             // eth_accounts will return an empty array.
             console.error(err);
           });          
-          results = {
-            web3Instance: web3,
-            netIdName,
-            netId,
-            injectedWeb3: true,
-            defaultAccount,
-            trustApiName,
-            explorerUrl
-          }
-          resolve(results)
+
         })
 
         console.log('Injected web3 detected.');

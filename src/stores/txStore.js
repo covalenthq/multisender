@@ -83,24 +83,14 @@ class TxStore {
       return
     }
     const token_address = this.tokenStore.tokenAddress
-    let {addresses_to_send, balances_to_send, proxyMultiSenderAddress, currentFee, totalBalance} =  this.tokenStore;
+    let {addresses_to_send, balances_to_send, proxyMultiSenderAddress, totalBalance} =  this.tokenStore;
     
     
     const start = (slice - 1) * addPerTx;
     const end = slice * addPerTx;
     addresses_to_send = addresses_to_send.slice(start, end);
     balances_to_send = balances_to_send.slice(start, end);
-    let ethValue;
-    if(token_address === "0x000000000000000000000000000000000000bEEF"){
-      
-      const totalInWei = balances_to_send.reduce((total, num) => {
-        return (new BN(total).plus(new BN(num)))
-      })
-      const totalInEth = Web3Utils.fromWei(totalInWei.toString())
-      ethValue = new BN(currentFee).plus(totalInEth)
-    } else {
-      ethValue = new BN(currentFee)
-    }
+
     console.log('slice', slice, addresses_to_send[0], balances_to_send[0], addPerTx)
     const web3 = this.web3Store.web3;
     const multisender = new web3.eth.Contract(MultiSenderAbi, proxyMultiSenderAddress);
@@ -110,7 +100,7 @@ class TxStore {
       let gas = await web3.eth.estimateGas({
           from: this.web3Store.defaultAccount,
           data: encodedData,
-          value: Web3Utils.toHex(Web3Utils.toWei(ethValue.toString())),
+          value: 0x00,
           to: proxyMultiSenderAddress
       })
       console.log('gas', gas)
@@ -119,7 +109,7 @@ class TxStore {
         from: this.web3Store.defaultAccount,
         gasPrice: this.gasPriceStore.standardInHex,
         gas: Web3Utils.toHex(gas + 150000),
-        value: Web3Utils.toHex(Web3Utils.toWei(ethValue.toString())),
+        value: 0x00,
       })
 
       .on('transactionHash', (hash) => {

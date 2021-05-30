@@ -31,6 +31,11 @@ export class ThirdStep extends React.Component {
   }
   onNext(e) {
     e.preventDefault();
+    
+    console.log("defAccTokenBalance " + this.tokenStore.defAccTokenBalance)
+    console.log("defAccTokenBalance " + this.tokenStore.defAccTokenBalance)
+    console.log("totalBalance " + this.tokenStore.totalBalance)
+
     if (new BN(this.tokenStore.totalBalance).gt(new BN(this.tokenStore.defAccTokenBalance))){
       console.error('Your balance is more than total to send')
       swal({
@@ -94,10 +99,6 @@ export class ThirdStep extends React.Component {
                 <div className="send-info-i">
                   <p>Your Balance</p>
                   <p className="send-info-amount">{this.tokenStore.defAccTokenBalance} {this.tokenStore.tokenSymbol}</p>
-                </div>
-                <div className="send-info-i">
-                  <p>Your Contract's Current fee Per tx</p>
-                  <p className="send-info-amount">{this.tokenStore.currentFee} ETH</p>
                 </div>
                 <div className="send-info-i">
                   <p>Your ETH Balance</p>

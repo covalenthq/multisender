@@ -13,7 +13,6 @@ class TokenStore {
   @observable tokenAddress = '';
   @observable defAccTokenBalance = ''
   @observable allowance = ''
-  @observable currentFee = ''
   @observable tokenSymbol = ''
   @observable ethBalance = ''
   @observable balances_to_send = []
@@ -98,22 +97,6 @@ class TokenStore {
     }
   }
 
-  @action
-  async getCurrentFee(){
-    try {
-      this.web3Store.getWeb3Promise.then(async () => {
-        const web3 = this.web3Store.web3;
-        const multisender = new web3.eth.Contract(StormMultiSenderABI, this.proxyMultiSenderAddress);
-        const currentFee = await multisender.methods.currentFee(this.web3Store.defaultAccount).call();
-        this.currentFee = Web3Utils.fromWei(currentFee)
-        return this.currentFee
-      }) 
-    }
-    catch(e){
-      console.error('getCurrentFee',e)
-    }
-  }
-
   async getArrayLimit(){
     try {
       await this.web3Store.getWeb3Promise.then(async () => {
@@ -136,13 +119,11 @@ class TokenStore {
         await this.getDecimals(tokenAddress)
         await this.getBalance()
         await this.getAllowance()
-        await this.getCurrentFee()
         this.getTokenSymbol(tokenAddress)
         this.getEthBalance()
         this.getArrayLimit()
       } else {
         this.tokenAddress = tokenAddress;
-        await this.getCurrentFee()
         await this.getEthBalance()
         this.getArrayLimit()
         this.decimals = 18;
@@ -168,7 +149,6 @@ class TokenStore {
     this.tokenAddress = '';
     this.defAccTokenBalance = ''
     this.allowance = ''
-    this.currentFee = ''
     this.tokenSymbol = ''
     this.ethBalance = ''
     this.balances_to_send = []
@@ -244,12 +224,9 @@ class TokenStore {
 
   @computed get totalCostInEth(){
     const standardGasPrice = Web3Utils.toWei(this.gasPriceStore.selectedGasPrice.toString(), 'gwei');
-    const currentFeeInWei = Web3Utils.toWei(this.currentFee);
     const tx = new BN(standardGasPrice).times(new BN('5000000'))
-    const txFeeMiners = tx.times(new BN(this.totalNumberTx))
-    const contractFee = new BN(currentFeeInWei).times(this.totalNumberTx);
-    
-    return Web3Utils.fromWei(txFeeMiners.plus(contractFee).toString(10))
+    const txFeeMiners = tx.times(new BN(this.totalNumberTx))    
+    return Web3Utils.fromWei(txFeeMiners.toString(10))
   }
 
 }

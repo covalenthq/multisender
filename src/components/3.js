@@ -122,7 +122,6 @@ export class ThirdStep extends React.Component {
           // Gas Used by Transaction: 82,164 (97.49%)
           const multisendGas = Math.floor(parseInt(multisendGasOrig) * 0.975)
           this.setState({multisendGas})
-          this.updateCurrentFee()
         } else {
           if (parseFloat(this.tokenStore.allowance) >= (parseFloat(this.tokenStore.totalBalance))){
             const multisendGasOrig = await this.txStore.getMultisendGas({slice: this.tokenStore.totalNumberTx, addPerTx: this.tokenStore.arrayLimit})
@@ -133,7 +132,6 @@ export class ThirdStep extends React.Component {
             const multisendGas = Math.floor(parseInt(multisendGasOrig) * 0.71)
             const approveGas = await this.txStore.getApproveTxGas()
             this.setState({multisendGas, approveGas})
-            this.updateCurrentFee()
           } else {
             const approveGasOrig = await this.txStore.getApproveGas()
             // Gas Limit: 66,181
@@ -146,30 +144,6 @@ export class ThirdStep extends React.Component {
         console.log("3:", ex)
       }
     })()
-  }
-
-  updateCurrentFee() {
-    const id = setTimeout(() => {
-      clearTimeout(id)
-      this._updateCurrentFeeImpl()
-    }, 0)
-  }
-
-  _updateCurrentFeeImpl() {
-    const { multisendGas, approveGas, transferGas } = this.state
-    const gasPrice = this.gasPriceStore.standardInHex
-    const approvePlusMultisendGas = (new BN(multisendGas)).plus(new BN(approveGas))
-    if (approvePlusMultisendGas.gt(new BN(transferGas))) {
-      // no savings
-      this.tokenStore.setCurrentFee('0')
-      return
-    }
-    const savedGas = (new BN(transferGas)).minus(approvePlusMultisendGas)
-    const savedGasEthValue = new BN(gasPrice).times(savedGas)
-    const savedGasPerTxEthValue = savedGasEthValue.div(this.tokenStore.totalNumberTx)
-    const newCurrentFee = savedGasPerTxEthValue.times(new BN(parseInt(this.gasPriceStore.selectedGasShare))).div(100)
-    const newCurrentFeeRounded = newCurrentFee.dp(0, 1)
-    this.tokenStore.setCurrentFee(newCurrentFeeRounded.toString(10))
   }
 
   onNext = async (wizard) => {
@@ -223,14 +197,12 @@ export class ThirdStep extends React.Component {
   onGasPriceChange = (selected) => {
     if(selected){
       this.gasPriceStore.setSelectedGasPrice(selected.value)
-      this.updateCurrentFee()
     }
   }
 
   onGasShareChange = (selected) => {
     if(selected){
       this.gasPriceStore.setSelectedGasShare(selected.value)
-      this.updateCurrentFee()
     }
   }
 
@@ -315,21 +287,12 @@ export class ThirdStep extends React.Component {
         </div>
       )
     } else {
-      if (new BN(this.tokenStore.allowance).gte(new BN(this.tokenStore.totalBalance))){
-        return (
-          <div className="send-info-i">
-            <p>Gas spent with Multisend, ETH</p>
-            <p className="send-info-amount">{displayMultisendGasEthValue}</p>
-          </div>
-        )
-      } else {
-        return (
-          <div className="send-info-i">
-            <p>Gas spent with Multisend, ETH</p>
-            <p className="send-info-amount">N/A</p>
-          </div>
-        )
-      }
+      return (
+        <div className="send-info-i">
+          <p>Gas spent with Multisend, ETH</p>
+          <p className="send-info-amount">{displayMultisendGasEthValue}</p>
+        </div>
+      )
     }
   }
 
@@ -359,21 +322,12 @@ export class ThirdStep extends React.Component {
         </div>
       )
     } else {
-      if (new BN(this.tokenStore.allowance).gte(new BN(this.tokenStore.totalBalance))){
-        return (
-          <div className="send-info-i">
-            <p>Your gas savings, ETH</p>
-            <p className="send-info-amount">{sign}{displaySavedGasEthValue}</p>
-          </div>
-        )
-      } else {
-        return (
-          <div className="send-info-i">
-            <p>Your gas savings, ETH</p>
-            <p className="send-info-amount">N/A</p>
-          </div>
-        )
-      }
+      return (
+        <div className="send-info-i">
+          <p>Your gas savings, ETH</p>
+          <p className="send-info-amount">{sign}{displaySavedGasEthValue}</p>
+        </div>
+      )
     }
   }
 
@@ -384,13 +338,9 @@ export class ThirdStep extends React.Component {
           <div className="description">
             <ol>
               <li>Choose <strong>Gas Price</strong></li>
-              <li>Choose <strong>Gas Sharing</strong></li>
               <li>Verify addresses and values</li>
               <li>Press the <strong>Next</strong> button</li>
             </ol>
-            <p>
-              <strong>Gas Sharing</strong> is a portion of gas saved by this service that you are OK to tip
-            </p>
           </div>
           <Form className="form">
             <div className="form-inline">
@@ -405,22 +355,6 @@ export class ThirdStep extends React.Component {
                   loadingPlaceholder="Fetching gas Price data ..."
                   placeholder="Please select desired network speed"
                   options={this.gasPriceStore.gasPricesArray.slice()}
-                />
-              </div>
-            </div>
-
-            <div className="form-inline">
-              <div className="form-inline-i form-inline-i_gas-sharing">
-                <label htmlFor="gas-sharing" className="multisend-label">Saved Gas Sharing</label>
-                <Select.Creatable
-                  isLoading={false}
-                  name="gas-sharing"
-                  id="gas-sharing"
-                  value={this.gasPriceStore.selectedGasShare}
-                  onChange={this.onGasShareChange}
-                  loadingPlaceholder=""
-                  placeholder="Please select desired gas sharing"
-                  options={this.gasSharesArray.slice()}
                 />
               </div>
             </div>

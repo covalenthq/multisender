@@ -29,7 +29,6 @@ class Web3Store {
       }
       const {web3Instance, defaultAccount, netId, netIdName} = web3Config;
       this.defaultAccount = defaultAccount;
-      // this.web3 = new Web3(web3Instance.currentProvider);
       this.web3 = web3Instance;
       this.netId = netId;
       this.netIdName = netIdName;

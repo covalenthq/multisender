@@ -1,18 +1,19 @@
 import Web3 from 'web3'
+import detectEthereumProvider from '@metamask/detect-provider'
+
 let getWeb3 = () => {
   return new Promise(function (resolve, reject) {
     // Wait for loading completion to avoid race conditions with web3 injection timing.
     window.addEventListener('load', async function () {
       var results
-      var web3 = window.web3
+
+      const web3Provider = await detectEthereumProvider()
 
       // Checking if Web3 has been injected by the browser (Mist/MetaMask)
-      if (typeof web3 !== 'undefined') {
+      if (web3Provider) {
         // Use Mist/MetaMask's provider.
-        //web3 = new window.Web3(web3.currentProvider)
-        let web3Provider = window.web3.currentProvider;
+        const web3Instance = new Web3(web3Provider);
         await window.ethereum.enable()
-        //web3.version.getNetwork((err, netId) => {
           window.ethereum.request({ method: 'eth_chainId' }).then((netId) => 
           {
           let netIdName, trustApiName, explorerUrl;
@@ -74,7 +75,7 @@ let getWeb3 = () => {
               reject({message: 'Please unlock your metamask and refresh the page'})
             }
             results = {
-              web3Instance: web3,
+              web3Instance: web3Instance,
               netIdName,
               netId,
               injectedWeb3: true,

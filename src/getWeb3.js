@@ -13,43 +13,44 @@ let getWeb3 = () => {
       if (web3Provider) {
         // Use Mist/MetaMask's provider.
         const web3Instance = new Web3(web3Provider);
-        await window.ethereum.enable()
-          window.ethereum.request({ method: 'eth_chainId' }).then((netId) => 
-          {
+
+        ethereum.request({ method: 'eth_chainId' }).then((netIdHex) =>
+        {
           let netIdName, trustApiName, explorerUrl;
+          const netId = web3Instance.utils.hexToNumber(netIdHex);
           console.log('netId', netId);
           switch (netId) {
-            case "1":
+            case 1:
               netIdName = 'Foundation'
               trustApiName = 'api'
               explorerUrl = 'https://etherscan.io'
               console.log('This is Foundation', netId)
               break;
-            case "3":
+            case 3:
               netIdName = 'Ropsten'
               trustApiName = 'ropsten'
               explorerUrl = 'https://ropsten.etherscan.io'
               console.log('This is Ropsten', netId)
               break;
-            case "4":
+            case 4:
               netIdName = 'Rinkeby'
               trustApiName = 'rinkeby'
               explorerUrl = 'https://rinkeby.etherscan.io'
               console.log('This is Rinkeby', netId)
               break;
-            case "42":
+            case 42:
               netIdName = 'Kovan'
               trustApiName = 'kovan'
               explorerUrl = 'https://kovan.etherscan.io'
               console.log('This is Kovan', netId)
               break;
-            case "99":
+            case 99:
               netIdName = 'POA Core'
               trustApiName = 'poa'
               explorerUrl = 'https://poaexplorer.com'
               console.log('This is Core', netId)
               break;
-            case "77":
+            case 77:
               netIdName = 'POA Sokol'
               trustApiName = 'https://trust-sokol.herokuapp.com'
               explorerUrl = 'https://sokol.poaexplorer.com'
@@ -60,10 +61,10 @@ let getWeb3 = () => {
               console.log('This is an unknown network.', netId)
           }
           document.title = `${netIdName} - MultiSender dApp`
+
           var defaultAccount = null;
-          window.ethereum
-          .request({ method: 'eth_accounts' })
-          .then((accounts) =>  {
+
+          ethereum.request({ method: 'eth_requestAccounts' }).then((accounts) =>  {
             if (accounts.length === 0) {
               // MetaMask is locked or the user has not connected any accounts
               console.log('Please connect to MetaMask.');
@@ -75,7 +76,7 @@ let getWeb3 = () => {
               reject({message: 'Please unlock your metamask and refresh the page'})
             }
             results = {
-              web3Instance: web3Instance,
+              web3Instance,
               netIdName,
               netId,
               injectedWeb3: true,

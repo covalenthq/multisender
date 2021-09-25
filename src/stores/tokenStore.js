@@ -124,23 +124,23 @@ class TokenStore {
 
   @action
   async setTokenAddress(tokenAddress) {
-    await this.web3Store.getWeb3Promise.then(async () => {
-      if(Web3Utils.isAddress(this.web3Store.defaultAccount) && tokenAddress !== "0x000000000000000000000000000000000000bEEF"){
-        this.tokenAddress = tokenAddress;
-        await this.getDecimals(tokenAddress)
-        await this.getBalance()
-        await this.getAllowance()
-        this.getTokenSymbol(tokenAddress)
-        this.getEthBalance()
-        this.getArrayLimit()
-      } else {
-        this.tokenAddress = tokenAddress;
-        await this.getEthBalance()
-        this.getArrayLimit()
-        this.decimals = 18;
-        this.defAccTokenBalance = this.ethBalance;
-      }
-    })
+    await this.web3Store.getWeb3Promise()
+
+    if(Web3Utils.isAddress(this.web3Store.defaultAccount) && tokenAddress !== "0x000000000000000000000000000000000000bEEF"){
+      this.tokenAddress = tokenAddress;
+      await this.getDecimals(tokenAddress)
+      await this.getBalance()
+      await this.getAllowance()
+      this.getTokenSymbol(tokenAddress)
+      this.getEthBalance()
+      this.getArrayLimit()
+    } else {
+      this.tokenAddress = tokenAddress;
+      await this.getEthBalance()
+      this.getArrayLimit()
+      this.decimals = 18;
+      this.defAccTokenBalance = this.ethBalance;
+    }
   }
 
   @action

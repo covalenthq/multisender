@@ -23,7 +23,18 @@ class TokenStore {
   @observable arrayLimit = 0
   @observable errors = []
   @observable dublicates = []
-  proxyMultiSenderAddress = process.env.REACT_APP_PROXY_MULTISENDER
+
+  async proxyMultiSenderAddress() {
+    try {
+      const web3Obj = await this.web3Store.getWeb3Promise()
+      const netIdEnvVarName = "REACT_APP_PROXY_MULTISENDER_" + web3Obj.netIdName.toUpperCase()
+      const contractAddress = process.env[netIdEnvVarName]
+      return contractAddress;
+    } catch (ex) {
+      console.log(ex)
+    }
+    return ""
+  }
   
   constructor(rootStore) {
     this.web3Store = rootStore.web3Store;
@@ -86,7 +97,7 @@ class TokenStore {
     try {
       const web3 = this.web3Store.web3;
       const token = new web3.eth.Contract(ERC20ABI, this.tokenAddress);
-      const allowance = await token.methods.allowance(this.web3Store.defaultAccount, this.proxyMultiSenderAddress).call();
+      const allowance = await token.methods.allowance(this.web3Store.defaultAccount, await this.proxyMultiSenderAddress()).call();
       this.allowance = new BN(allowance).div(this.multiplier).toString(10)
       return this.allowance
     }
@@ -101,7 +112,7 @@ class TokenStore {
     try {
       await this.web3Store.getWeb3Promise.then(async () => {
         const web3 = this.web3Store.web3;
-        const multisender = new web3.eth.Contract(StormMultiSenderABI, this.proxyMultiSenderAddress);
+        const multisender = new web3.eth.Contract(StormMultiSenderABI, await this.proxyMultiSenderAddress());
         this.arrayLimit = await multisender.methods.arrayLimit().call();
         return this.arrayLimit
       }) 
